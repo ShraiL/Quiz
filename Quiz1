@@ -1,0 +1,79 @@
+using System;
+
+namespace Schreier.Quiz1
+{
+    // საბაზისო კლასი
+    public class Car
+    {
+        protected string CarClass;
+        protected decimal Price;
+        protected int Speed;
+
+        public Car(string carClass, decimal price, int speed)
+        {
+            CarClass = carClass;
+            Price = price;
+            Speed = speed;
+        }
+    }
+
+    // ინტერფეისი
+    public interface ICarAssistant
+    {
+        void Assist();
+    }
+
+    // Mercedes კლასი, მემკვიდრეობს Car-სგან
+    public class Mercedes : Car
+    {
+        public Mercedes(string carClass, decimal price, int speed)
+            : base(carClass, price, speed)
+        {
+        }
+    }
+
+    // Audi კლასი, მემკვიდრეობს Car-სგან და ახორციელებს ICarAssistant ინტერფეისს
+    public class Audi : Car, ICarAssistant
+    {
+        private bool HasQuattroSystem;
+
+        public Audi(string carClass, decimal price, int speed, bool hasQuattroSystem)
+            : base(carClass, price, speed)
+        {
+            HasQuattroSystem = hasQuattroSystem;
+        }
+
+        public void Assist()
+        {
+            Console.WriteLine($"I am ready to assist driver of {CarClass}");
+        }
+    }
+
+    // პროგრამის მთავარი კლასი
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            // ობიექტების შექმნა
+            Audi audi1 = new Audi("Sport", 50000, 250, true);
+            Audi audi2 = new Audi("Family", 40000, 200, false);
+
+            Mercedes mercedes1 = new Mercedes("Luxury", 60000, 240);
+
+            // მხოლოდ Audi-ს დამატება, რადგან მხოლოდ ის ახორციელებს ICarAssistant-ს
+            ICarAssistant[] carAssistants = new ICarAssistant[] { audi1, audi2 };
+
+            // სტატიკური ფუნქციის გამოძახება
+            CallAssist(carAssistants);
+        }
+
+        // სტატიკური ფუნქცია, რომელიც იძახებს Assist()-ს
+        public static void CallAssist(ICarAssistant[] assistants)
+        {
+            foreach (var assistant in assistants)
+            {
+                assistant.Assist();
+            }
+        }
+    }
+}
