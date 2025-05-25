@@ -1,0 +1,75 @@
+using System;
+
+namespace Schreier.Quiz2
+{
+    // Robot კლასი
+    public class Robot
+    {
+        public int ID { get; set; }
+
+        public Robot(int id)
+        {
+            ID = id;
+        }
+    }
+
+    // RobotFactory კლასი Singleton ლოგიკით
+    public class RobotFactory
+    {
+        private static RobotFactory _instance;
+        private static readonly object _lock = new object(); // თრედ-სეიფისთვის
+        private int _counter;
+
+        // პრივატული კონსტრუქტორი - არ შეიძლება პირდაპირი შექმნა გარედან
+        private RobotFactory()
+        {
+            _counter = 1;
+        }
+
+        // მხოლოდ ერთი ობიექტის შექმნა (Singleton Pattern)
+        public static RobotFactory New()
+        {
+            if (_instance == null)
+            {
+                lock (_lock)
+                {
+                    if (_instance == null)
+                        _instance = new RobotFactory();
+                }
+            }
+            return _instance;
+        }
+
+        // Robot-ის შექმნის მეთოდი
+        public Robot CreateRobot()
+        {
+            Robot robot = new Robot(_counter);
+            _counter++;
+            return robot;
+        }
+    }
+
+    // პროგრამის ძირითადი კლასი
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            // RobotFactory-ის Singleton ობიექტის მიღება
+            RobotFactory factory = RobotFactory.New();
+
+            // რობოტების შექმნა
+            Robot r1 = factory.CreateRobot();
+            Robot r2 = factory.CreateRobot();
+            Robot r3 = factory.CreateRobot();
+
+            // შედეგის დაბეჭდვა
+            Console.WriteLine($"Robot 1 ID: {r1.ID}");
+            Console.WriteLine($"Robot 2 ID: {r2.ID}");
+            Console.WriteLine($"Robot 3 ID: {r3.ID}");
+
+            // დამტკიცება რომ მხოლოდ ერთი factory არსებობს
+            RobotFactory anotherFactory = RobotFactory.New();
+            Console.WriteLine($"Is same factory instance: {factory == anotherFactory}");
+        }
+    }
+}
