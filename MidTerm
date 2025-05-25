@@ -1,0 +1,152 @@
+using System;
+using System.Collections.Generic;
+
+namespace Schreier.MidTerm
+{
+    // Custom Exception
+    public class InvalidCarPropertyException : ArgumentException
+    {
+        public InvalidCarPropertyException()
+            : this("Invalid property value.") { }
+
+        public InvalidCarPropertyException(string message)
+            : this(message, null) { }
+
+        public InvalidCarPropertyException(string message, Exception inner)
+            : base(message, inner) { }
+    }
+
+    // ინტერფეისი
+    public interface IAssistent
+    {
+        string Assist();
+    }
+
+    // საბაზისო Car კლასი
+    public abstract class Car
+    {
+        public string Name { get; set; }
+        public int Speed { get; set; }
+        public int Weight { get; set; }
+
+        protected Car(string name, int speed, int weight)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new InvalidCarPropertyException("Name cannot be empty or null.");
+
+            if (speed < 0)
+                throw new InvalidCarPropertyException("Speed cannot be less than 0.");
+
+            if (weight < 0)
+                throw new InvalidCarPropertyException("Weight cannot be less than 0.");
+
+            Name = name;
+            Speed = speed;
+            Weight = weight;
+        }
+
+        // ოპერატორების გადატვირთვა Speed-ის მიხედვით
+        public static bool operator >(Car a, Car b) => a.Speed > b.Speed;
+        public static bool operator <(Car a, Car b) => a.Speed < b.Speed;
+        public static bool operator ==(Car a, Car b) => a.Speed == b.Speed;
+        public static bool operator !=(Car a, Car b) => a.Speed != b.Speed;
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Car otherCar)
+                return this.Speed == otherCar.Speed;
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Speed.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"{this.GetType().Name} - {Name}, Speed: {Speed}, Weight: {Weight}";
+        }
+    }
+
+    // Audi კლასი
+    public class Audi : Car
+    {
+        public Audi(string name, int speed, int weight)
+            : base(name, speed, weight)
+        {
+        }
+    }
+
+    // Mercedes კლასი
+    public class Mercedes : Car, IAssistent
+    {
+        public bool HasAssistent { get; set; }
+
+        public Mercedes(string name, int speed, int weight, bool hasAssistent)
+            : base(name, speed, weight)
+        {
+            HasAssistent = hasAssistent;
+        }
+
+        public string Assist()
+        {
+            return $"Hello, {Name}. I am ready to assist you";
+        }
+    }
+
+    // მთავარი პროგრამა
+    internal class Program
+    {
+        // საერთო მანქანების სია
+        static List<Car> allCars = new List<Car>();
+
+        // ყველაზე სწრაფი მანქანის პოვნა
+        public static Car GetFastestCar(Car[] cars)
+        {
+            if (cars == null || cars.Length == 0) return null;
+
+            Car fastest = cars[0];
+            foreach (var car in cars)
+            {
+                if (car > fastest)
+                    fastest = car;
+            }
+            return fastest;
+        }
+
+        static void Main(string[] args)
+        {
+            try
+            {
+                // მანქანების შექმნა
+                Audi audi1 = new Audi("Audi A4", 220, 1500);
+                Audi audi2 = new Audi("Audi RS7", 280, 1800);
+                Mercedes mercedes1 = new Mercedes("Mercedes S-Class", 250, 2000, true);
+                Mercedes mercedes2 = new Mercedes("Mercedes AMG", 280, 1900, true);
+
+                // შენახვა საერთო სიაში
+                allCars.Add(audi1);
+                allCars.Add(audi2);
+                allCars.Add(mercedes1);
+                allCars.Add(mercedes2);
+
+                // ყველაზე სწრაფის პოვნა
+                Car fastest = GetFastestCar(allCars.ToArray());
+
+                Console.WriteLine("ყველაზე სწრაფი მანქანა:");
+                Console.WriteLine(fastest);
+
+                // დამატებით: ასისტენტის ჩვენება
+                if (fastest is IAssistent assistant)
+                {
+                    Console.WriteLine(assistant.Assist());
+                }
+            }
+            catch (InvalidCarPropertyException ex)
+            {
+                Console.WriteLine($"შეცდომა: {ex.Message}");
+            }
+        }
+    }
+}
